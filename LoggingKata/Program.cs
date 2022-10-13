@@ -17,17 +17,18 @@ namespace LoggingKata
         static void Main(string[] args)
         {
             logger.LogInfo("Log initialized");
-            logger.LogInfo($"Path name of file: {csvPath}");
+            logger.LogInfo($"Path name of file to parse: {csvPath}");
 
             // use File.ReadAllLines(path) to grab all the lines from your csv file
             // Log and error if you get 0 lines and a warning if you get 1 line
             
             var lines = File.ReadAllLines(csvPath);
-            
-            if(lines[0] == null)
+
+            if (lines.Count() == 0)
             {
                 logger.LogError("No Lines!");
-            } else if (lines[1] == null)
+            }
+            else if (lines.Count() == 1)
             {
                 logger.LogWarning($"Only One Line: {lines[0]}");
             }
