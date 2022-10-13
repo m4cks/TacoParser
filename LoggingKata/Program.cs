@@ -5,6 +5,10 @@ using GeoCoordinatePortable;
 
 namespace LoggingKata
 {
+    /// <summary>
+    /// Parses a CSV file and compares GeoLocations of TacoBells
+    /// saves the two TacoBells with the greatest distance between eachother and their distance
+    /// </summary>
     class Program
     {
         static readonly ILog logger = new TacoLogger();
@@ -12,27 +16,26 @@ namespace LoggingKata
 
         static void Main(string[] args)
         {
-            // TODO:  Find the two Taco Bells that are the furthest from one another.
-            // HINT:  You'll need two nested forloops ---------------------------
-
             logger.LogInfo("Log initialized");
+            logger.LogInfo($"Path name of file: {csvPath}");
 
             // use File.ReadAllLines(path) to grab all the lines from your csv file
             // Log and error if you get 0 lines and a warning if you get 1 line
+            
             var lines = File.ReadAllLines(csvPath);
+            
             if(lines[0] == null)
             {
                 logger.LogError("No Lines!");
             } else if (lines[1] == null)
             {
-                logger.LogWarning("Only One Line.");
+                logger.LogWarning($"Only One Line: {lines[0]}");
             }
-            logger.LogInfo($"Lines: {lines[0]}");
-
-            // Create a new instance of your TacoParser class
+            
+            // New instance of TacoParser class
             var parser = new TacoParser();
 
-            // Grab an IEnumerable of locations using the Select command: var locations = lines.Select(parser.Parse);
+            // Grabs an IEnumerable of locations using the Select command: var locations = lines.Select(parser.Parse);
             var locations = lines.Select(parser.Parse).ToArray();
 
             ITrackable firstTacoBell = null;
@@ -41,28 +44,33 @@ namespace LoggingKata
 
             // Include the Geolocation toolbox, so you can compare locations: `using GeoCoordinatePortable;`
 
-            GeoCoordinate locA;
-            GeoCoordinate locB;
-            
+            GeoCoordinate locA = new GeoCoordinate();
+            GeoCoordinate locB = new GeoCoordinate();
 
+            //Nested loop to compare each Location against every other Location
             for(int i = 0; i < locations.Length; i++)
             {
-                locA = new GeoCoordinate(locations[i].Location.Latitude, locations[i].Location.Longitude);
-                for(int j = 1; j < locations.Length; j++)
+                //Instead of creating a new GeoCoordinate each time, let's simply update the Lat and Lon data
+                locA.Latitude = locations[i].Location.Latitude;
+                locA.Longitude = locations[i].Location.Longitude;
+
+                for (int j = 1; j < locations.Length; j++)
                 {
-                    locB = new GeoCoordinate(locations[j].Location.Latitude, locations[j].Location.Longitude);
+                    locB.Latitude = locations[j].Location.Latitude;
+                    locB.Longitude = locations[j].Location.Longitude;
+
                     if (locA.GetDistanceTo(locB) > greatestDistance)
                     {
                         greatestDistance = locA.GetDistanceTo(locB);
                         firstTacoBell = locations[i];
                         secondTacoBell = locations[j];
-                        //Console.WriteLine($"Updating the new greatest distance! It is now {greatestDistance} and it is between {firstTacoBell.Name} and {secondTacoBell.Name}");
+                        //logger.LogInfo($"Updating the new greatest distance! It is now {greatestDistance} and it is between {firstTacoBell.Name} and {secondTacoBell.Name}");
                     }
                 }
             }
             
             // Once you've looped through everything, you've found the two Taco Bells farthest away from each other.
-            Console.WriteLine($"The greatest distance is between {firstTacoBell.Name} and {secondTacoBell.Name}. The Distance is {greatestDistance}");
+            logger.LogInfo($"The greatest distance is between {firstTacoBell.Name} and {secondTacoBell.Name}. The Distance is {greatestDistance} meters");
         }
     }
 }
